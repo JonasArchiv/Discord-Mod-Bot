@@ -10,6 +10,11 @@ intents.messages = True
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 
+async def user_has_role(ctx, *roles):
+    user_roles = [role.name for role in ctx.author.roles]
+    return any(role in user_roles for role in roles)
+
+
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user.name}')
@@ -36,7 +41,7 @@ async def setup(ctx):
 
 @bot.slash_command(name="clear", description="Deletes all messages in the channel")
 async def clear(ctx):
-    if "Moderator" in [role.name for role in ctx.author.roles]:
+    if await user_has_role(ctx, "Moderator", "Admin"):
         if ctx.channel.type == discord.ChannelType.text:
             try:
                 deleted = await ctx.channel.purge(limit=None)
@@ -48,7 +53,18 @@ async def clear(ctx):
         else:
             await ctx.respond("This command can only be used in text channels.")
     else:
-        await ctx.respond("You must have the Moderator role to use this command.", delete_after=5)
+        await ctx.respond("You do not have the required role to use this command.", delete_after=5)
+
+
+@bot.slash_command(name="ban", description="Bans a user from the server (Moderators only)")
+async def ban(ctx, user: discord.Member, *, reason=None):
+    if await user_has_role(ctx, "Moderator", "Admin"):
+        await user.ban(reason=reason)
+        with open("banned_users.txt", "a") as file:
+            file.write(f"{user.id}, {user.name}: {reason}\n")
+        await ctx.respond(f"{user.name} has been banned for: {reason}", delete_after=5)
+    else:
+        await ctx.respond("You do not have the required role to use this command.", delete_after=5)
 
 
 bot.run(TOKEN)

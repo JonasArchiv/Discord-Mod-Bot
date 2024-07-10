@@ -8,4 +8,6 @@ Discord Bot for Moderation
 3. Run `/setup`
 
 # Commands:
-- /clear – Clears the text channel who is executed (Admins only)
+- `/setup` – Create all Roles that you need (Admins only)
+- `/clear` – Clears the text channel who is executed (Moderator only)
+- `/ban` – Bans a user from the server (Moderator only)
