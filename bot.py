@@ -56,13 +56,32 @@ async def clear(ctx):
         await ctx.respond("You do not have the required role to use this command.", delete_after=5)
 
 
-@bot.slash_command(name="ban", description="Bans a user from the server (Moderators only)")
+@bot.slash_command(name="ban", description="Bans a user from the server")
 async def ban(ctx, user: discord.Member, *, reason=None):
     if await user_has_role(ctx, "Moderator", "Admin"):
         await user.ban(reason=reason)
         with open("banned_users.txt", "a") as file:
             file.write(f"{user.id}, {user.name}: {reason}\n")
         await ctx.respond(f"{user.name} has been banned for: {reason}", delete_after=5)
+    else:
+        await ctx.respond("You do not have the required role to use this command.", delete_after=5)
+
+
+@bot.slash_command(name="unban", description="Unbans a user from the server")
+async def unban(ctx, user_id: int):
+    if await user_has_role(ctx, "Moderator", "Admin"):
+        user = await bot.fetch_user(user_id)
+        await ctx.guild.unban(user)
+        await ctx.respond(f"{user.name} has been unbanned.", delete_after=5)
+    else:
+        await ctx.respond("You do not have the required role to use this command.", delete_after=5)
+
+
+@bot.slash_command(name="kick", description="Kicks a user from the server")
+async def kick(ctx, user: discord.Member, *, reason=None):
+    if await user_has_role(ctx, "Moderator", "Admin"):
+        await user.kick(reason=reason)
+        await ctx.respond(f"{user.name} has been kicked for: {reason}", delete_after=5)
     else:
         await ctx.respond("You do not have the required role to use this command.", delete_after=5)
 
